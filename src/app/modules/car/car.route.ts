@@ -8,10 +8,12 @@ import {
 import { bookingController } from "../booking/booking.controller";
 import auth from "../middleware/auth";
 import { USER_ROLE } from "../user/user.constant";
+import { upload, uploadToImgBB } from "../../config/cloudinary";
 
 const router = express.Router();
 
 router.post("/cars", auth(USER_ROLE.admin), carController.createCar);
+// router.post("/cars", carController.createCar);
 router.get("/cars", carController.getAllCars);
 router.get("/cars/:id", carController.getSingleCar);
 router.put(

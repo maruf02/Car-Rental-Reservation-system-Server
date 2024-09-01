@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import { TCar } from "./car.interface";
+import { number } from "zod";
 
 const carSchema = new Schema<TCar>(
   {
@@ -15,8 +16,25 @@ const carSchema = new Schema<TCar>(
       type: String,
       required: true,
     },
-    isElectric: {
-      type: Boolean,
+    rating: {
+      type: Number,
+      required: true,
+    },
+    model: {
+      type: String,
+      required: true,
+    },
+    year: {
+      type: String,
+      required: true,
+    },
+    // isElectric: {
+    //   type: Boolean,
+    //   required: true,
+    // },
+    category: {
+      type: String,
+      enum: ["Sedan", "SUV", "Sports Car", "Hybrid", "Electric"],
       required: true,
     },
     status: {
@@ -26,6 +44,11 @@ const carSchema = new Schema<TCar>(
       required: true,
     },
     features: {
+      type: [String],
+      required: true,
+    },
+
+    images: {
       type: [String],
       required: true,
     },

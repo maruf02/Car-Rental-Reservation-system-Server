@@ -17,8 +17,21 @@ const userSchema = new Schema<TUser>(
     },
     role: {
       type: String,
-      required: true,
       enum: ["user", "admin"],
+      default: "user", // Auto-set default value
+    },
+    isBlock: {
+      type: String,
+      enum: ["Yes", "No"],
+      default: "No", // Auto-set default value
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+    image: {
+      type: String,
     },
     password: {
       type: String,
@@ -28,11 +41,11 @@ const userSchema = new Schema<TUser>(
     },
     phone: {
       type: String,
-      required: true,
+      // required: true,
     },
     address: {
       type: String,
-      required: true,
+      // required: true,
     },
   },
   { timestamps: true }
@@ -48,6 +61,10 @@ userSchema.pre("save", async function (next) {
 });
 userSchema.post("save", function (doc, next) {
   doc.password = "";
+  next();
+});
+userSchema.pre("find", function (next) {
+  this.find({ isDeleted: { $ne: true } });
   next();
 });
 

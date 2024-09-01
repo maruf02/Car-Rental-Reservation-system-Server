@@ -12,30 +12,30 @@ type TReturnData = {
   endTime: string;
 };
 
-const createBookingIntoDB = async (bookingData: TBooking) => {
-  // const { car, user } = bookingData;
-  const { car, user, date, startTime } = bookingData;
-  const cars = await CarModel.findById(car);
-  const carStatus = cars?.status;
-  // console.log(carStatus);
-  if (carStatus === "unavailable") {
-    // console.log("already booked");
-    throw new AppError(StatusCodes.FORBIDDEN, "already booked");
-  }
-  // const booking = await BookingModel.create(bookingData);
-  const booking = await BookingModel.create({
-    car,
-    user,
-    date,
-    startTime,
-  });
+// const createBookingIntoDB = async (bookingData: TBooking) => {
+//   // const { car, user } = bookingData;
+//   const { car, user, date, startTime } = bookingData;
+//   const cars = await CarModel.findById(car);
+//   const carStatus = cars?.status;
+//   // console.log(carStatus);
+//   if (carStatus === "unavailable") {
+//     // console.log("already booked");
+//     throw new AppError(StatusCodes.FORBIDDEN, "already booked");
+//   }
+//   // const booking = await BookingModel.create(bookingData);
+//   const booking = await BookingModel.create({
+//     car,
+//     user,
+//     date,
+//     startTime,
+//   });
 
-  await CarModel.updateOne({ _id: car }, { $set: { status: "unavailable" } });
-  const populatedBooking = (
-    await booking.populate("user", "-password -createdAt -updatedAt -__v")
-  ).populate("car", "-__v");
-  return populatedBooking;
-};
+//   await CarModel.updateOne({ _id: car }, { $set: { status: "unavailable" } });
+//   const populatedBooking = (
+//     await booking.populate("user", "-password -createdAt -updatedAt -__v")
+//   ).populate("car", "-__v");
+//   return populatedBooking;
+// };
 
 const getAllBookingFromDB = async () => {
   const cars = await BookingModel.find();
@@ -59,6 +59,31 @@ const getAllBookingQueryFromDB = async (carId?: string, date?: string) => {
     .populate("car", "-__v");
   return bookings;
 };
+
+const createBookingIntoDB = async (bookingData: TBooking) => {
+  try {
+    const { car, user, date, startTime } = bookingData;
+    const cars = await CarModel.findById(car);
+    const carStatus = cars?.status;
+
+    if (carStatus === "unavailable") {
+      throw new AppError(StatusCodes.FORBIDDEN, "Car is already booked");
+    }
+
+    const booking = await BookingModel.create(bookingData);
+
+    await CarModel.updateOne({ _id: car }, { $set: { status: "unavailable" } });
+
+    const populatedBooking = (
+      await booking.populate("user", "-password -createdAt -updatedAt -__v")
+    ).populate("car", "-__v");
+
+    return populatedBooking;
+  } catch (error) {
+    console.error("Error creating booking:", error);
+    throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
 const getBookingByUserIdFromDB = async (userId: string) => {
   // const userId = "666b07c07e36eebd720beab5";
   const myBookings = await BookingModel.find({ user: userId })
@@ -72,9 +97,7 @@ const returnBookingFromDB = async (bookingId: string, endTime: string) => {
   if (!bookingDetails) {
     throw new AppError(StatusCodes.NOT_FOUND, "Booking not found");
   }
-  if (!bookingDetails) {
-    throw new AppError(StatusCodes.NOT_FOUND, "Booking not found");
-  }
+
   const { startTime, car } = bookingDetails;
 
   if (!car) {
@@ -97,10 +120,52 @@ const returnBookingFromDB = async (bookingId: string, endTime: string) => {
   return updatedBooking;
 };
 
+const updateBookingInDB = async (
+  bookingId: string,
+  updateData: Partial<TBooking>
+) => {
+  const booking = await BookingModel.findById(bookingId);
+
+  if (!booking) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Booking not found");
+  }
+
+  // Update the booking with the new data
+  const updatedBooking = await BookingModel.findByIdAndUpdate(
+    bookingId,
+    { $set: updateData },
+    { new: true } // Return the updated document
+  )
+    .populate("user", "-password -createdAt -updatedAt -__v")
+    .populate("car", "-__v");
+
+  return updatedBooking;
+};
+
+const deleteBookingFromDB = async (bookingId: string) => {
+  const booking = await BookingModel.findById(bookingId);
+
+  if (!booking) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Booking not found");
+  }
+
+  const { car } = booking;
+
+  // Delete the booking
+  await BookingModel.findByIdAndDelete(bookingId);
+
+  // Update the car status to 'available'
+  await CarModel.updateOne({ _id: car }, { $set: { status: "available" } });
+
+  return booking;
+};
+
 export const bookingService = {
   createBookingIntoDB,
   getAllBookingFromDB,
   getBookingByUserIdFromDB,
   getAllBookingQueryFromDB,
   returnBookingFromDB,
+  updateBookingInDB,
+  deleteBookingFromDB,
 };

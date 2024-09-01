@@ -5,18 +5,73 @@ import { StatusCodes } from "http-status-codes";
 // import { bookingValidationSchema } from "./booking.validation";
 import catchAsync from "../utils/cacheAsync";
 import sendResponse from "../utils/sendResponse";
+import moment from "moment";
+import AppError from "../utils/AppError";
 // import moment from "moment";
 // import { decode } from "jsonwebtoken";
 
+// const createBooking = catchAsync(async (req: Request, res: Response) => {
+//   const { carId, date, startTime } = req.body;
+//   const { _id } = req.userAll;
+//   const today = moment().startOf("day"); // Start of today's date
+//   const bookingDate = moment(date).startOf("day"); // Start of the booking date
+
+//   if (bookingDate.isBefore(today)) {
+//     throw new AppError(
+//       StatusCodes.BAD_REQUEST,
+//       "Booking date cannot be in the past"
+//     );
+//   }
+//   const bookingData = {
+//     car: carId,
+//     user: _id,
+//     date,
+//     startTime,
+//   };
+//   const result = await bookingService.createBookingIntoDB(bookingData);
+
+//   sendResponse(res, {
+//     statusCode: StatusCodes.OK,
+//     success: true,
+//     message: "Booking is created successfully",
+//     data: result,
+//   });
+// });
+
 const createBooking = catchAsync(async (req: Request, res: Response) => {
-  const { carId, date, startTime } = req.body;
+  const {
+    carId,
+    date,
+    startTime,
+    DLicense,
+    additionInfo,
+    nid,
+    passport,
+    paymentInfo,
+  } = req.body;
   const { _id } = req.userAll;
+  const today = moment().startOf("day");
+  const bookingDate = moment(date).startOf("day");
+
+  if (bookingDate.isBefore(today)) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Booking date cannot be in the past"
+    );
+  }
+
   const bookingData = {
     car: carId,
     user: _id,
     date,
     startTime,
+    DLicense,
+    additionInfo,
+    nid,
+    passport,
+    paymentInfo,
   };
+
   const result = await bookingService.createBookingIntoDB(bookingData);
 
   sendResponse(res, {
@@ -77,6 +132,31 @@ const returnBooking = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const updateBooking = catchAsync(async (req: Request, res: Response) => {
+  const { bookingId } = req.params;
+  const updateData = req.body;
+
+  const result = await bookingService.updateBookingInDB(bookingId, updateData);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Booking updated successfully",
+    data: result,
+  });
+});
+
+const deleteBooking = catchAsync(async (req: Request, res: Response) => {
+  const { bookingId } = req.params;
+  const result = await bookingService.deleteBookingFromDB(bookingId);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Booking deleted successfully",
+    data: result,
+  });
+});
 
 export const bookingController = {
   createBooking,
@@ -84,4 +164,6 @@ export const bookingController = {
   getBookingByUserId,
   getAllBookingQuery,
   returnBooking,
+  updateBooking,
+  deleteBooking,
 };

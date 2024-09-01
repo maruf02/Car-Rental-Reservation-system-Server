@@ -16,8 +16,38 @@ const bookingSchema = new Schema<TBooking>({
     ref: "Car",
     required: true,
   },
+  status: {
+    type: String,
+    enum: ["pending", "approved"],
+    default: "pending",
+  },
+  payment: {
+    type: String,
+    enum: ["unPaid", "Paid"],
+    default: "unPaid",
+  },
   startTime: {
     type: String,
+    required: true,
+  },
+  nid: {
+    type: String,
+    required: true,
+  },
+  passport: {
+    type: String,
+    required: true,
+  },
+  DLicense: {
+    type: String,
+    required: true,
+  },
+  paymentInfo: {
+    type: String,
+    required: true,
+  },
+  additionInfo: {
+    type: [String],
     required: true,
   },
   endTime: {

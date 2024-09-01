@@ -3,7 +3,10 @@ import { USER_ROLE } from "./user.constant";
 export type TUser = {
   name: string;
   email: string;
-  role: "user" | "admin";
+  image?: string;
+  role?: "user" | "admin";
+  isBlock?: "Yes" | "No";
+  isDeleted?: boolean;
   password: string;
   phone: string;
   address: string;
