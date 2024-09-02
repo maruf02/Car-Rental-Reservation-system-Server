@@ -81,7 +81,11 @@ const createBookingIntoDB = async (bookingData: TBooking) => {
     return populatedBooking;
   } catch (error) {
     console.error("Error creating booking:", error);
-    throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+    throw new AppError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      // error.message as string
+      "An unknown error occurred."
+    );
   }
 };
 const getBookingByUserIdFromDB = async (userId: string) => {

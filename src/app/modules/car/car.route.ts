@@ -1,14 +1,9 @@
 import express from "express";
 import { carController } from "./car.controller";
-import validateRequest from "../middleware/validateRequest";
-import {
-  createCarValidationSchema,
-  updateCarValidationSchema,
-} from "./car.validation";
+
 import { bookingController } from "../booking/booking.controller";
 import auth from "../middleware/auth";
 import { USER_ROLE } from "../user/user.constant";
-import { upload, uploadToImgBB } from "../../config/cloudinary";
 
 const router = express.Router();
 

@@ -17,7 +17,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://b3a4-camper-shop.vercel.app",
+      "https://car-rental-project-kappa.vercel.app",
       "*",
     ],
     credentials: true,
